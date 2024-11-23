@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symulacja MOV </title>
+</head>
+<body>
+    <style>
+            body {
+                font-family: Arial,  sans-serif;
+                margin: 20px;
+            }
+            .registers {
+                margin-bottom: 20px;
+            }
+            .register {
+                margin: 5px 0;
+            }
+    </style>
+    <div class="registers">
+        <div class="register">
+            <label for="ax">AX:</label>
+            <input type="text" id="ax" value="0x1234" readonly>
+        </div>
+        <div class="register">
+            <label for="bx">BX:</label>
+            <input type="text" id="bx" value="0xABCD" readonly>
+        </div>
+        <div class="register">
+            <label for="">CX:</label>
+            <input type="text" id="cx" value="0x5678" readonly>
+        </div>
+        <div class="register">
+            <label for="dx">DX:</label>
+            <input type="text" id="dx" value="0x9ABC" readonly>
+        </div>
+    </div>
+    <button onclick="simulateMOV()">Wykonaj Symulację MOV</button>
+        <script src="script.js"></script>
+</body>
+</html>

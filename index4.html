@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symulacja rozkazów MOV z adresowaniem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+        }
+        select, input {
+            padding: 5px;
+            margin: 10px 0;
+            width: 100%;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .result {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Symulacja rozkazów MOV z adresowaniem</h1>
+
+        <!-- Symulacja MOV między rejestrami -->
+        <h3>Symulacja MOV między rejestrami</h3>
+        <label for="source">Wybierz rejestr źródłowy:</label>
+        <select id="source">
+            <option value="AX">AX</option>
+            <option value="BX">BX</option>
+            <option value="CX">CX</option>
+            <option value="DX">DX</option>
+        </select>
+
+        <label for="destination">Wybierz rejestr docelowy:</label>
+        <select id="destination">
+            <option value="AX">AX</option>
+            <option value="BX">BX</option>
+            <option value="CX">CX</option>
+            <option value="DX">DX</option>
+        </select>
+
+        <label for="value">Wartość do zapisania:</label>
+        <input type="number" id="value" placeholder="Podaj wartość" />
+
+        <button onclick="moveRegister()">Wykonaj MOV</button>
+
+        <hr>
+
+        <!-- Symulacja XCHG -->
+        <h3>Symulacja XCHG</h3>
+        <label for="register1">Wybierz pierwszy rejestr:</label>
+        <select id="register1">
+            <option value="AX">AX</option>
+            <option value="BX">BX</option>
+            <option value="CX">CX</option>
+            <option value="DX">DX</option>
+        </select>
+
+        <label for="register2">Wybierz drugi rejestr:</label>
+        <select id="register2">
+            <option value="AX">AX</option>
+            <option value="BX">BX</option>
+            <option value="CX">CX</option>
+            <option value="DX">DX</option>
+        </select>
+
+        <button onclick="exchangeRegisters()">Wykonaj XCHG</button>
+
+        <hr>
+
+        <!-- Symulacja MOV z pamięci do rejestrów -->
+        <h3>Symulacja MOV z pamięci do rejestrów</h3>
+        <label for="memoryAddress">Wybierz adres pamięci (0-4):</label>
+        <select id="memoryAddress">
+            <option value="0">Adres 0</option>
+            <option value="1">Adres 1</option>
+            <option value="2">Adres 2</option>
+            <option value="3">Adres 3</option>
+            <option value="4">Adres 4</option>
+        </select>
+
+        <label for="registerMemoryDestination">Wybierz rejestr docelowy:</label>
+        <select id="registerMemoryDestination">
+            <option value="AX">AX</option>
+            <option value="BX">BX</option>
+            <option value="CX">CX</option>
+            <option value="DX">DX</option>
+        </select>
+
+        <button onclick="moveFromMemoryToRegister()">Wykonaj MOV z pamięci do rejestru</button>
+
+        <hr>
+
+        <!-- Symulacja MOV z rejestrów do pamięci -->
+        <h3>Symulacja MOV z rejestrów do pamięci</h3>
+        <label for="registerMemorySource">Wybierz rejestr źródłowy:</label>
+        <select id="registerMemorySource">
+            <option value="AX">AX</option>
+            <option value="BX">BX</option>
+            <option value="CX">CX</option>
+            <option value="DX">DX</option>
+        </select>
+
+        <label for="memoryDestination">Wybierz adres pamięci (0-4):</label>
+        <select id="memoryDestination">
+            <option value="0">Adres 0</option>
+            <option value="1">Adres 1</option>
+            <option value="2">Adres 2</option>
+            <option value="3">Adres 3</option>
+            <option value="4">Adres 4</option>
+        </select>
+
+        <button onclick="moveFromRegisterToMemory()">Wykonaj MOV z rejestru do pamięci</button>
+
+        <hr>
+
+        <!-- Symulacja MOV z różnymi trybami adresowania -->
+        <h3>Symulacja MOV z adresowaniem</h3>
+        <label for="mode">Wybierz tryb adresowania:</label>
+        <select id="mode">
+            <option value="base">Adresowanie bazowe</option>
+            <option value="index">Adresowanie indeksowe</option>
+            <option value="base-index">Adresowanie indeksowo-bazowe</option>
+        </select>
+
+        <label for="bx">Wartość BX (szesnastkowo):</label>
+        <input type="text" id="bx" placeholder="Wartość BX" />
+
+        <label for="bp">Wartość BP (szesnastkowo):</label>
+        <input type="text" id="bp" placeholder="Wartość BP" />
+
+        <label for="si">Wartość SI (szesnastkowo):</label>
+        <input type="text" id="si" placeholder="Wartość SI" />
+
+        <label for="di">Wartość DI (szesnastkowo):</label>
+        <input type="text" id="di" placeholder="Wartość DI" />
+
+        <label for="offset">Offset (szesnastkowo):</label>
+        <input type="text" id="offset" placeholder="Offset" />
+
+        <button onclick="moveWithAddressing()">Wykonaj MOV z adresowaniem</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Inicjalizacja rejestrów
+        let registers = {
+            AX: 0,
+            BX: 0,
+            CX: 0,
+            DX: 0
+        };
+
+        // Inicjalizacja pamięci (5 komórek)
+        let memory = [0, 0, 0, 0, 0];
+
+        // Funkcja symulująca rozkaz MOV między rejestrami
+        function moveRegister() {
+            const source = document.getElementById('source').value;
+            const destination = document.getElementById('destination').value;
+            const value = parseInt(document.getElementById('value').value, 10);
+
+            if (isNaN(value)) {
+                document.getElementById('result').innerText = 'Proszę podać poprawną liczbę!';
+                return;
+            }
+
+            registers[destination] = value;
+            document.getElementById('result').innerText = `${source} zawiera ${registers[source]}. Po wykonaniu MOV, ${destination} zawiera ${registers[destination]}.`;
+            document.getElementById('value').value = '';
+        }
+
+        // Funkcja symulująca rozkaz XCHG (wymiana wartości między rejestrami)
+        function exchangeRegisters() {
+            const register1 = document.getElementById('register1').value;
+            const register2 = document.getElementById('register2').value;
+
+            let temp = registers[register1];
+            registers[register1] = registers[register2];
+            registers[register2] = temp;
+
+            document.getElementById('result').innerText = `Po wykonaniu XCHG: ${register1} zawiera ${registers[register1]}, a ${register2} zawiera ${registers[register2]}.`;
+        }
+
+        // Funkcja symulująca MOV z pamięci do rejestru
+        function moveFromMemoryToRegister() {
+            const memoryAddress = parseInt(document.getElementById('memoryAddress').value, 10);
+            const registerDestination = document.getElementById('registerMemoryDestination').value;
+
+            const valueFromMemory = memory[memoryAddress];
+            registers[registerDestination] = valueFromMemory;
+
+            document.getElementById('result').innerText = `Z pamięci adres ${memoryAddress} (wartość ${valueFromMemory}) do rejestru ${registerDestination}. ${registerDestination} zawiera teraz ${registers[registerDestination]}.`;
+        }
+
+        // Funkcja symulująca MOV z rejestru do pamięci
+        function moveFromRegisterToMemory() {
+            const registerSource = document.getElementById('registerMemorySource').value;
+            const memoryAddress = parseInt(document.getElementById('memoryDestination').value, 10);
+
+            const valueFromRegister = registers[registerSource];
+            memory[memoryAddress] = valueFromRegister;
+
+            document.getElementById('result').innerText = `Z rejestru ${registerSource} (wartość ${valueFromRegister}) do pamięci adres ${memoryAddress}. Pamięć na adresie ${memoryAddress} zawiera teraz ${memory[memoryAddress]}.`;
+        }
+
+        // Funkcja obliczająca adres pamięci na podstawie trybu adresowania
+        function calculateMemoryAddress(mode, bx, bp, si, di, offset) {
+            // Przekształcanie wartości szesnastkowych na liczby dziesiętne
+            bx = parseInt(bx, 16);
+            bp = parseInt(bp, 16);
+            si = parseInt(si, 16);
+            di = parseInt(di, 16);
+            offset = parseInt(offset, 16);
+
+            let address = 0;
+
+            if (mode === "base") {
+                // Adresowanie bazowe (BX + offset)
+                address = bx + offset;
+            } else if (mode === "index") {
+                // Adresowanie indeksowe (SI + offset)
+                address = si + offset;
+            } else if (mode === "base-index") {
+                // Adresowanie indeksowo-bazowe (BX + SI + offset)
+                address = bx + si + offset;
+            }
+
+            return address;
+        }
+
+        // Funkcja symulująca MOV z adresowaniem
+        function moveWithAddressing() {
+            const mode = document.getElementById('mode').value;
+            const bx = document.getElementById('bx').value;
+            const bp = document.getElementById('bp').value;
+            const si = document.getElementById('si').value;
+            const di = document.getElementById('di').value;
+            const offset = document.getElementById('offset').value;
+
+            // Wyliczanie adresu pamięci
+            const memoryAddress = calculateMemoryAddress(mode, bx, bp, si, di, offset);
+
+            // Przesyłanie zawartości rejestru do pamięci lub odwrotnie
+            if (mode === "base" || mode === "index" || mode === "base-index") {
+                registers.AX = memory[memoryAddress] || 0; // Przykładowa operacja MOV z pamięci do rejestru AX
+                document.getElementById('result').innerText = `Adres pamięci wynosi ${memoryAddress}. Wartość pamięci: ${memory[memoryAddress]} została przeniesiona do rejestru AX.`;
+            }
+        }
+    </script>
+</body>
+</html>
